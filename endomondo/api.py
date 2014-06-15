@@ -45,3 +45,15 @@ class Api(object):
         logging.debug('Got auth token from endomondo: %s' % m.group(1))
         return m.group(1)
 
+    def get_workouts(self, limit, fields = ['basic']):
+        url = 'https://api.mobile.endomondo.com/mobile/api/workouts'
+        params = {
+            'authToken': self.auth_token,
+            'fields': ','.join(fields),
+            'maxResult': limit
+        }
+
+        r = self.session.get(url,params = params)
+        workouts = r.json()['data']
+
+        return workouts
