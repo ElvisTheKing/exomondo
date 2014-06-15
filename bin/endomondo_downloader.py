@@ -1,47 +1,41 @@
-from splinter import Browser
-import requests
+import os
+import time
 import click
-import re
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
+import endomondo
 
 @click.command()
-@click.argument('username')
+@click.argument('email')
 @click.argument('password')
-def download(username,password):
+@click.option('--out', prompt = 'directory to download files into, default = .' )
+def download(email,password, out = None):
+    if not out:
+        out = os.getcwd()
+    else:
+        out = os.path.abspath(out)
+
     user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36"
-    b = Browser('phantomjs',user_agent=user_agent)
-    try:
-        b.visit('http://www.endomondo.com')
-        b.find_link_by_href('login').first.click()
+    
+    api = endomondo.Api(email, password, user_agent = user_agent)
+    browser = endomondo.Browser(email,password, user_agent = user_agent)  
 
-        b.fill('email',username)
-        b.fill('password',password)
-        b.find_by_css('div.signInButton').first.click()
+    workouts = api.get_workouts(200)
+    logging.info('will get %d workouts' % len(workouts))
+    for workout in workouts:
+        track = browser.download_track(workout['id'])
 
-        b.visit('http://www.endomondo.com/workouts/list')
-
-        b.find_by_css('tbody.compareShadow td.title').first.click()
-        b.find_by_css('span.more').first.mouse_over()
-        b.find_by_css('a.export').first.click()
-
-        # b.find_by_css('div.wizard a').last.click()
-
-        m = re.search('<a href="\.\./(.+?exportGpxLink.+?)">',b.html)
-        url = 'http://www.endomondo.com/'+m.group(1)
-
-        cookies = dict(map(lambda cookie: (cookie['name'],cookie['value']), b.cookies.all()))
-        headers = {'User-Agent': user_agent}        
-        r = requests.get(url, cookies = cookies, headers = headers)
+        start_time = time.strptime(workout['start_time'], '%Y-%m-%d %H:%M:%S %Z')
+        start_time_str = time.strftime('%Y-%m-%d_%H-%M-%S',start_time) 
+        if 'name' in workout:
+            name = '(%s)'%workout['name']
+        else: 
+            name = ''
         
-        print(r.url)
-        print(r.headers)
-        print(r.status_code)
-        print(r.text)
+        filename = os.path.join(out,"%s%s.gpx" %(start_time_str,name))
+        logging.info('writing track to %s' % filename)
+        with open(filename,'w') as f:
+            f.write(track)
 
-    finally:
-        b.screenshot('/Users/zz/Dropbox/Workspace/python/endomondo_track_downloader/bin/scr/')
 
 if __name__ == '__main__':
     download()
