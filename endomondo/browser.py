@@ -6,7 +6,7 @@ import re
 logging.basicConfig(level=logging.DEBUG)
 
 class Browser(object):
-    def __init__(self,email,password,user_agent = None,cookies = None):
+    def __init__(self,email = None,password = None, user_agent = None, cookies = None):
 
         self.browser = splinter.Browser('firefox',user_agent=user_agent)
 
@@ -14,6 +14,8 @@ class Browser(object):
         self.session.headers.update({'User-Agent': user_agent})
 
         if (not cookies):
+            if not (email and password):
+                raise Exception('you should specify email and password or cookies')
             self.cookies = self.login(email,password)
         else:
             self.cookies = cookies
@@ -38,7 +40,6 @@ class Browser(object):
         b.visit(url)
         b.find_by_css('span.more').first.click()
         b.find_by_css('a.export').first.click()
-        b.screenshot('/Users/zz/Dropbox/Workspace/python/endomondo_track_downloader/bin/scr/')
         m = re.search('<a href="\.\./(.+?exportGpxLink.+?)">',b.html)
         
         url = 'http://www.endomondo.com/'+m.group(1)
