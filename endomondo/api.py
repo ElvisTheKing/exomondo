@@ -50,7 +50,7 @@ class Api(object):
         params = {
             'authToken': self.auth_token,
             'fields': ','.join(fields),
-            'maxResult': limit
+            'maxResults': limit
         }
 
         r = self.session.get(url,params = params)
