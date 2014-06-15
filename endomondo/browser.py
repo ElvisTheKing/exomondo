@@ -2,6 +2,7 @@ import splinter
 import requests
 import logging
 import re
+from time import sleep
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -40,6 +41,7 @@ class Browser(object):
         b.visit(url)
         b.find_by_css('span.more').first.click()
         b.find_by_css('a.export').first.click()
+        sleep(1)
         m = re.search('<a href="\.\./(.+?exportGpxLink.+?)">',b.html)
         
         url = 'http://www.endomondo.com/'+m.group(1)
