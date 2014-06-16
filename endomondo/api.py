@@ -3,8 +3,6 @@ import logging
 import uuid
 import re
 
-logging.basicConfig(level=logging.DEBUG)
-
 class Api(object):
     def __init__(self, 
                 email = None, 

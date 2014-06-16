@@ -4,12 +4,10 @@ import logging
 import re
 from time import sleep
 
-logging.basicConfig(level=logging.DEBUG)
-
 class Browser(object):
-    def __init__(self,email = None,password = None, user_agent = None, cookies = None):
+    def __init__(self, webdriver, email = None,password = None, user_agent = None, cookies = None):
 
-        self.browser = splinter.Browser('phantomjs',user_agent=user_agent)
+        self.browser = splinter.Browser(webdriver,user_agent=user_agent)
 
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': user_agent})
