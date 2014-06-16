@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+
 import os
 import time
 import click
 import logging
-import endomondo
+import exomondo
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,12 +16,13 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--limit', help = 'maximum tracks to download', default = 10)
 
 def download(email,password, out, webdriver, limit):
+    """ This script downloads gpx tracks from endomondo """
     out = os.path.abspath(out)
 
     user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36"
     
-    api = endomondo.Api(email, password, user_agent = user_agent)
-    browser = endomondo.Browser(email = email, password = password, user_agent = user_agent, webdriver = webdriver)  
+    api = exomondo.Api(email, password, user_agent = user_agent)
+    browser = exomondo.Browser(email = email, password = password, user_agent = user_agent, webdriver = webdriver)  
 
     workouts = api.get_workouts(limit)
     logging.info('will get %d workouts' % len(workouts))
