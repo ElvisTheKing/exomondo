@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 class Browser(object):
     def __init__(self,email = None,password = None, user_agent = None, cookies = None):
 
-        self.browser = splinter.Browser('firefox',user_agent=user_agent)
+        self.browser = splinter.Browser('phantomjs',user_agent=user_agent)
 
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': user_agent})
@@ -36,12 +36,29 @@ class Browser(object):
 
     def download_track(self,workout_id):
         url = 'http://www.endomondo.com/workouts/%d' % workout_id
-
+        logging.debug('exploring workout %d' % workout_id)
+        
         b = self.browser
         b.visit(url)
-        b.find_by_css('span.more').first.click()
-        b.find_by_css('a.export').first.click()
-        sleep(1)
+        try:
+            b.find_by_css('span.more').first.mouse_over()
+        except NotImplementedError:
+            b.find_by_css('span.more').first.click()
+        
+        try:
+            b.find_by_css('a.export').first.click()
+        except splinter.exceptions.ElementDoesNotExist:
+            logging.info('There is no track available for workout %d' % workout_id)
+            return None
+
+        for i in range(0,20):
+            if b.is_text_present('CHOOSE EXPORT DESTINATION'):
+                logging.debug('it took %d s for ajax to finish' % 0.2*i)
+                break
+            sleep(0.2)
+        else: 
+            raise Exception('Export dialog was not loaded')
+
         m = re.search('<a href="\.\./(.+?exportGpxLink.+?)">',b.html)
         
         url = 'http://www.endomondo.com/'+m.group(1)
