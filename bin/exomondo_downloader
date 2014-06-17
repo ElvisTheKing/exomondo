@@ -11,9 +11,9 @@ logging.basicConfig(level=logging.INFO)
 @click.command()
 @click.argument('email')
 @click.argument('password')
-@click.option('--out', help = 'directory to download files into', default = '.' )
-@click.option('--webdriver', help = 'web_driver to use for browser interactions', default = 'phantomjs')
-@click.option('--limit', help = 'maximum tracks to download', default = 10)
+@click.option('--out', help = 'directory to download files into', default = '.', show_default=True)
+@click.option('--webdriver', help = 'web_driver to use for browser interactions', default = 'phantomjs', show_default=True)
+@click.option('--limit', help = 'maximum tracks to download', default = 10, show_default=True)
 
 def download(email,password, out, webdriver, limit):
     """ This script downloads gpx tracks from endomondo """
